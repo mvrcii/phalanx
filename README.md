@@ -82,7 +82,7 @@ phalanx download-fragment --scroll-name Scroll1 --volpkg-name PHercParis4.volpkg
 
 - **Multithreaded Downloads**: Download slices in parallel for improved performance.
 - **Flexible Slice Selection**: Download specific slices, ranges, or all slices.
-- **User-Friendly CLI**: Command-line interface built with Click.
+- **User-Friendly CLI**: Command-line interface built with [Click](https://click.palletsprojects.com/en/stable/).
 
 ## Contributing
 
