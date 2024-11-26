@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vesuvius-phalanx"
-version = "0.1.0"
+version = "0.1.1"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
     { name = "Marcel Roth", email = "marcelroth100@aol.com" }
@@ -26,3 +26,10 @@ requires-python = ">=3.8"
 
 [project.scripts]
 phnx = "phnx.cli:cli"
+
+[tool.setuptools]
+packages = ["phnx"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+phnx = ["../assets/*"]
