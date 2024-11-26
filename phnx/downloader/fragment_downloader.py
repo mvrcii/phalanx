@@ -61,11 +61,11 @@ class FragmentDownloader(BaseDownloader):
             return
 
         # Prepare download tasks
-        output_folder = os.path.join(output_dir, scroll_name, "fragments", fragment_id, "layers")
+        output_folder = os.path.join(output_dir, scroll_name.lower(), "fragments", fragment_id, "layers")
         os.makedirs(output_folder, exist_ok=True)
         tasks = utils.prepare_download_tasks(layers_url, ranges, output_folder, filename_format="{:02d}.tif")
         if not tasks:
-            print(f"All files downloaded for '{scroll_name}' and '{fragment_id}'.")
+            print(f"All files downloaded for '{scroll_name.lower()}' and '{fragment_id}'.")
             return
 
         # Start downloading
