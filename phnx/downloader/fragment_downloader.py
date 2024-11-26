@@ -1,4 +1,3 @@
-# phnx/downloader/fragment_downloader.py
 import os
 from urllib.parse import urljoin
 

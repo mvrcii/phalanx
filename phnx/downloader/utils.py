@@ -16,7 +16,7 @@ def create_session():
     adapter = HTTPAdapter(max_retries=retries)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    session.headers.update({'User-Agent': 'PHNX Downloader/1.0'})
+    session.headers.update({'User-Agent': 'phalanx Downloader/1.0'})
     return session
 
 

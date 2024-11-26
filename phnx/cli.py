@@ -6,7 +6,7 @@ from phnx.downloader.volume_downloader import VolumeDownloader
 
 @click.group()
 def cli():
-    """PHNX: A versatile downloader for scrolls and fragments."""
+    """phalanx: A versatile downloader for scrolls and fragments."""
     pass
 
 

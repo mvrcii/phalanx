@@ -15,7 +15,7 @@ pip install -e .
 ```
 
 ## Requirements
-- Python 3.10+
+- Python 3.8+
 
 Install all dependencies with:
 

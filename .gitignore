@@ -2,6 +2,7 @@ __pycache__
 *.egg-info
 .idea
 phnx/data
+dist
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm
