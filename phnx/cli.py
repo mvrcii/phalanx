@@ -27,7 +27,8 @@ def download_volume(scroll_name, volpkg_name, volume_id, slices):
 @click.option('--volpkg-name', default=None, help='Name of the volpkg (if multiple are available).')
 @click.argument('fragment-id', required=True)
 @click.option('--slices', default='all', help='Slice ranges to download (e.g., "0-10,15,20-25").')
-def download_fragment(output_dir, scroll_name, volpkg_name, fragment_id, slices):
+@click.option('--mask', default=True, help='Download the mask for the fragment.')
+def download_fragment(output_dir, scroll_name, volpkg_name, fragment_id, slices, mask):
     """Download slices from a fragment."""
     downloader = FragmentDownloader()
     downloader.download(
@@ -35,7 +36,8 @@ def download_fragment(output_dir, scroll_name, volpkg_name, fragment_id, slices)
         scroll_name=scroll_name,
         volpkg_name=volpkg_name,
         fragment_id=fragment_id,
-        slices=slices
+        slices=slices,
+        mask=mask
     )
 
 

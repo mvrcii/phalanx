@@ -11,7 +11,7 @@ class FragmentDownloader(BaseDownloader):
         self.session = utils.create_session()
         self.default_config = BaseDownloader.load_default_config()
 
-    def download(self, output_dir, scroll_name, volpkg_name, fragment_id, slices):
+    def download(self, output_dir, scroll_name, volpkg_name, fragment_id, slices, mask):
         scroll_url = urljoin(self.BASE_URL, f"{scroll_name}/")
 
         # Fetch available volpkgs
@@ -60,13 +60,19 @@ class FragmentDownloader(BaseDownloader):
             print("No valid slice ranges provided.")
             return
 
-        # Prepare download tasks
-        output_folder = os.path.join(output_dir, scroll_name.lower(), "fragments", fragment_id, "layers")
-        os.makedirs(output_folder, exist_ok=True)
-        tasks = utils.prepare_download_tasks(layers_url, ranges, output_folder, filename_format="{:02d}.tif")
-        if not tasks:
-            print(f"All files downloaded for '{scroll_name.lower()}' and '{fragment_id}'.")
-            return
+        fragment_dir = os.path.join(output_dir, scroll_name.lower(), "fragments", fragment_id)
+        os.makedirs(fragment_dir, exist_ok=True)
 
-        # Start downloading
-        self.start_downloads(tasks)
+        output_folder = os.path.join(fragment_dir, "layers")
+        slice_tasks = utils.prepare_slice_download_tasks(layers_url, ranges, output_folder, filename_format="{:02d}.tif")
+        if slice_tasks:
+            self.start_downloads(slice_tasks)
+        else:
+            print(f"All slices downloaded for '{scroll_name}' and '{fragment_id}'.")
+
+        if mask:
+            mask_tasks = utils.prepare_mask_download_task(fragment_url, fragment_dir, filename=f"{fragment_id}_mask.png")
+            if mask_tasks:
+                self.start_downloads(mask_tasks, file_type='mask')
+            else:
+                print(f"Mask downloaded for '{scroll_name}' and '{fragment_id}'.")

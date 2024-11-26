@@ -89,7 +89,7 @@ class VolumeDownloader(BaseDownloader):
         # Prepare download tasks
         output_folder = os.path.join("data", scroll_name.lower(), "volumes", volume_id, "layers")
         os.makedirs(output_folder, exist_ok=True)
-        tasks = utils.prepare_download_tasks(volume_url, ranges, output_folder, filename_format="{:05d}.tif")
+        tasks = utils.prepare_slice_download_tasks(volume_url, ranges, output_folder)
         if not tasks:
             print("All files are already downloaded.")
             return

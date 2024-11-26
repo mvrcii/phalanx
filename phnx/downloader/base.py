@@ -22,7 +22,7 @@ class BaseDownloader:
         raise NotImplementedError("Subclasses must implement the download method.")
 
     @staticmethod
-    def start_downloads(tasks):
+    def start_downloads(tasks, file_type="slices"):
         total_files = len(tasks)
         files_completed = 0
         total_bytes_downloaded = 0
@@ -30,8 +30,8 @@ class BaseDownloader:
         progress_queue = queue.Queue()
 
         # Since we don't know the total size, we initialize without total
-        pbar = tqdm(total=total_files, desc="Downloading files", unit='file', leave=True)
-        pbar.set_description(f"Downloading files (0B)")
+        pbar = tqdm(total=total_files, desc=f"Downloading {file_type}", unit='file', leave=True)
+        pbar.set_description(f"Downloading {file_type} (0B)")
 
         # Signal handling for graceful termination
         def signal_handler(signum, frame):
@@ -61,6 +61,7 @@ class BaseDownloader:
                 except queue.Empty:
                     pass  # No progress updates; loop again
 
+        pbar.set_description(f"Downloading {file_type} done ({utils.format_bytes(total_bytes_downloaded)})")
         pbar.close()
 
     @staticmethod

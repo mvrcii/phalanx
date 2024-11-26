@@ -57,10 +57,19 @@ def fetch_meta(folder_url, session):
         return None
 
 
-def parse_slice_ranges(slice_ranges, max_slice):
-    """Parses a string of slice ranges and returns a list of ranges."""
+def parse_slice_ranges(slice_ranges, max_slices):
+    """
+       Parses slice ranges from a user input format like "1-10,15,20-25".
+
+       Args:
+           slice_ranges (str): Input string defining slice ranges (e.g., "1-10,15,20-25").
+           max_slices (int): Maximum number of slices to consider.
+
+       Returns:
+           list of tuples: List of ranges as (start, end, step).
+       """
     if slice_ranges.strip().lower() == 'all':
-        return [(0, max_slice - 1, 1)]
+        return [(0, max_slices - 1, 1)]
 
     pattern = re.compile(r'^(\d+)(?:-(\d+))?(?::(\d+))?$')
     ranges = []
@@ -75,16 +84,29 @@ def parse_slice_ranges(slice_ranges, max_slice):
         step = int(match.group(3)) if match.group(3) else 1
         if start > end:
             start, end = end, start
-        if start < 0 or end >= max_slice:
-            print(f"Range {start}-{end} is out of bounds (0-{max_slice - 1}).")
+        if start < 0 or end >= max_slices:
+            print(f"Range {start}-{end} is out of bounds (0-{max_slices - 1}).")
             continue
         ranges.append((start, end, step))
     return ranges
 
 
-def prepare_download_tasks(base_url, ranges, output_folder, filename_format="{:05d}.tif"):
-    """Prepares a list of download tasks based on the provided ranges."""
+def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_format="{:05d}.tif"):
+    """
+    Prepares a list of download tasks based on the provided ranges.
+
+    Args:
+        base_url (str): The base URL for downloading files.
+        ranges (list of tuples): List of (start, end, step) tuples for range generation.
+        output_folder (str): Path to the folder where the files will be downloaded.
+        filename_format (str): Format string for file naming. Default is "{:05d}.tif".
+
+    Returns:
+        list: List of download tasks as tuples (url, output_file).
+    """
     tasks = []
+    os.makedirs(output_folder, exist_ok=True)
+
     for start, end, step in ranges:
         for i in range(start, end + 1, step):
             filename = filename_format.format(i)
@@ -92,13 +114,43 @@ def prepare_download_tasks(base_url, ranges, output_folder, filename_format="{:0
             output_file = os.path.join(output_folder, filename)
             tmp_output_file = output_file + '.part'
 
+            # Remove temporary files if they exist
             if os.path.exists(tmp_output_file):
                 os.remove(tmp_output_file)
 
+            # Skip files that are already downloaded and meet the size requirement
             if os.path.exists(output_file) and os.path.getsize(output_file) >= 10 * 1024 * 1024:
                 continue
+
             tasks.append((url, output_file))
     return tasks
+
+
+def prepare_mask_download_task(base_url, output_folder, filename):
+    """
+    Prepares a download task based on the provided base URL.
+
+    Args:
+        base_url (str): The base URL for downloading files.
+        output_folder (str): Path to the folder where the files will be downloaded.
+        filename (str): Name of the mask file to download.
+
+    Returns:
+        list: List of download tasks as tuples (url, output_file).
+    """
+    mask_url = urljoin(base_url, filename)
+    output_file = os.path.join(output_folder, filename)
+    tmp_output_file = output_file + '.part'
+
+    # Remove temporary files if they exist
+    if os.path.exists(tmp_output_file):
+        os.remove(tmp_output_file)
+
+    # Skip files that are already downloaded
+    if os.path.exists(output_file):
+        return []
+
+    return [(mask_url, output_file)]
 
 
 def format_bytes(size):
