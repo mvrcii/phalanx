@@ -1,0 +1,98 @@
+# phalanx
+
+phalanx is a specialized tool for downloading scrolls and fragments, allowing users to efficiently retrieve specific slices from volumes and fragments. The name "phalanx" draws inspiration from the mythical phoenix, symbolizing rebirth and revival. Just as the phoenix rises from its ashes, phalanx is designed to help resurrect and breathe new life into ancient scrolls buried under the ashes of Mount Vesuvius, offering a modern way to explore and preserve these fragments of history.
+
+## Installation
+
+Clone the repository and install the package:
+
+```sh
+git clone https://github.com/mvrcii/phalanx.git
+cd phalanx
+pip install -e .
+```
+
+## Requirements
+
+- Python 3.6+
+- requests
+- beautifulsoup4
+- tqdm
+- click
+
+Install all dependencies with:
+
+```sh
+pip install -r requirements.txt
+```
+### Core Dependencies
+
+- **requests**: For handling HTTP requests and downloading content from the web.
+- **beautifulsoup4**: For parsing HTML and extracting useful information from web pages.
+- **tqdm**: Provides a progress bar to visualize the download progress.
+- **click**: A package for creating user-friendly command-line interfaces.
+
+You can install all dependencies with:
+
+```sh
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Download Slices from a Volume
+
+```sh
+phalanx download-volume --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] [--volume-id VOLUME_ID] [--slices SLICES]
+```
+
+- `--scroll-name`: Name of the scroll.
+- `--volpkg-name`: Name of the volpkg (optional).
+- `--volume-id`: Volume identifier (optional).
+- `--slices`: Slice ranges to download (default is all).
+
+### Download Slices from a Fragment
+
+```sh
+phalanx download-fragment --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] --fragment-id FRAGMENT_ID [--slices SLICES]
+```
+
+- `--scroll-name`: Name of the scroll.
+- `--volpkg-name`: Name of the volpkg (optional).
+- `--fragment-id`: Fragment identifier.
+- `--slices`: Slice ranges to download (default is all).
+
+## Examples
+
+### Download Slices 1-5 from a Volume
+
+```sh
+phalanx download-volume --scroll-name Scroll1 --volpkg-name PHercParis4.volpkg --volume-id 20230205180739 --slices 1-5
+```
+
+### Download All Slices from a Fragment
+
+```sh
+phalanx download-fragment --scroll-name Scroll1 --volpkg-name PHercParis4.volpkg --fragment-id 20230503225234 --slices all
+```
+
+## Features
+
+- **Multithreaded Downloads**: Download slices in parallel for improved performance.
+- **Flexible Slice Selection**: Download specific slices, ranges, or all slices.
+- **User-Friendly CLI**: Command-line interface built with Click.
+
+## Contributing
+
+Contributions are welcome! Please submit a pull request or open an issue.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Additional Notes
+
+- **Progress Bar**: Tracks the number of files downloaded and total data.
+- **Error Handling**: Informs users if any files fail to download after retries.
+- **Extensibility**: Easily add new downloaders or features.
+
