@@ -36,13 +36,14 @@ phalanx download-volume --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] [-
 ### Download Slices from a Fragment
 
 ```sh
-phalanx download-fragment --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] --fragment-id FRAGMENT_ID [--slices SLICES]
+phalanx download-fragment --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] --fragment-id FRAGMENT_ID [--slices SLICES] [--mask]
 ```
 
 - `--scroll-name`: Name of the scroll.
 - `--volpkg-name`: Name of the volpkg (optional).
 - `--fragment-id`: Fragment identifier.
 - `--slices`: Slice ranges to download (default is all).
+- `--mask`: Download mask (default is true).
 
 ## Examples
 
@@ -59,7 +60,7 @@ phnx download-volume --scroll-name Scroll1 --volume-id 20230205180739
 ```
 
 ### Download All Slices from a Scroll Fragment 
-The fragment mask is downloaded by default and can be turned off with the argument `--mask false`
+
 ```sh
 phnx download-fragment --scroll-name Scroll1 --fragment-id 20230503225234 --slices all
 ```
