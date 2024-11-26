@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vesuvius-phalanx"
-version = "0.1.1"
+version = "0.1.4"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
     { name = "Marcel Roth", email = "marcelroth100@aol.com" }
@@ -32,5 +32,7 @@ packages = ["phnx"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-phnx = ["../assets/*"]
-phnx = ["defaults.json"]
+phnx = [
+    "../assets/*",
+    "downloader/defaults.json"
+]
