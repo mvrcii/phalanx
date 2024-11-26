@@ -11,7 +11,7 @@ def cli():
 
 
 @cli.command(name='download-volume')
-@click.option('scroll-name', required=True, help='Name of the scroll.')
+@click.argument('scroll-name', required=True)
 @click.option('--volpkg-name', default=None, help='Name of the volpkg (if multiple are available).')
 @click.option('--volume-id', default=None, help='Volume identifier.')
 @click.option('--slices', default='all', help='Slice ranges to download (e.g., "1-5,10,15-20").')
@@ -22,10 +22,10 @@ def download_volume(scroll_name, volpkg_name, volume_id, slices):
 
 
 @cli.command(name='download-fragment')
-@click.option('--output-dir', default='data', help='Name of the scroll.')
-@click.option('scroll-name', required=True, help='Name of the scroll.')
+@click.option('--output-dir', default='data', help='Output data root directory.')
+@click.argument('scroll-name', required=True)
 @click.option('--volpkg-name', default=None, help='Name of the volpkg (if multiple are available).')
-@click.option('fragment-id', required=True, help='Fragment identifier.')
+@click.argument('fragment-id', required=True)
 @click.option('--slices', default='all', help='Slice ranges to download (e.g., "0-10,15,20-25").')
 def download_fragment(output_dir, scroll_name, volpkg_name, fragment_id, slices):
     """Download slices from a fragment."""
