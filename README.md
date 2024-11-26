@@ -15,12 +15,7 @@ pip install -e .
 ```
 
 ## Requirements
-
-- Python 3.6+
-- requests
-- beautifulsoup4
-- tqdm
-- click
+- Python 3.10+
 
 Install all dependencies with:
 
