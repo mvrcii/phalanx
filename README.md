@@ -6,34 +6,19 @@ phalanx is a specialized tool for downloading scrolls and fragments, allowing us
 
 ## Installation
 
-Clone the repository and install the package:
-
 ```sh
-git clone https://github.com/mvrcii/phalanx.git
-cd phalanx
-pip install -e .
+pip install vesuvius-phalanx
 ```
 
 ## Requirements
 - Python 3.8+
 
-Install all dependencies with:
-
-```sh
-pip install -r requirements.txt
-```
 ### Core Dependencies
 
 - **requests**: For handling HTTP requests and downloading content from the web.
 - **beautifulsoup4**: For parsing HTML and extracting useful information from web pages.
 - **tqdm**: Provides a progress bar to visualize the download progress.
 - **click**: A package for creating user-friendly command-line interfaces.
-
-You can install all dependencies with:
-
-```sh
-pip install -r requirements.txt
-```
 
 ## Usage
 
