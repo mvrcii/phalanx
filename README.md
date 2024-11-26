@@ -28,7 +28,7 @@ pip install vesuvius-phalanx
 phalanx download-volume --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] [--volume-id VOLUME_ID] [--slices SLICES]
 ```
 
-- `--scroll-name`: Name of the scroll.
+- `--scroll-name`: Name of the scroll (e.g., 'Scroll1').
 - `--volpkg-name`: Name of the volpkg (optional).
 - `--volume-id`: Volume identifier (optional).
 - `--slices`: Slice ranges to download (default is all).
@@ -39,7 +39,7 @@ phalanx download-volume --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] [-
 phalanx download-fragment --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] --fragment-id FRAGMENT_ID [--slices SLICES] [--mask]
 ```
 
-- `--scroll-name`: Name of the scroll.
+- `--scroll-name`: Name of the scroll (e.g., 'Scroll1').
 - `--volpkg-name`: Name of the volpkg (optional).
 - `--fragment-id`: Fragment identifier.
 - `--slices`: Slice ranges to download (default is all).
