@@ -1,3 +1,5 @@
+![UniversityHeader](https://github.com/mvrcii/phalanx/blob/main/assets/phalanx_banner.jpg)
+
 # phalanx
 
 phalanx is a specialized tool for downloading scrolls and fragments, allowing users to efficiently retrieve specific slices from volumes and fragments. The name "phalanx" draws inspiration from the mythical phoenix, symbolizing rebirth and revival. Just as the phoenix rises from its ashes, phalanx is designed to help resurrect and breathe new life into ancient scrolls buried under the ashes of Mount Vesuvius, offering a modern way to explore and preserve these fragments of history.
