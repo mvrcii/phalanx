@@ -87,8 +87,16 @@ class VolumeDownloader(BaseDownloader):
             return
 
         # Prepare download tasks
-        output_folder = os.path.join(output_path, scroll_name, "volumes", volume_id, "layers")
+        output_folder = os.path.join(output_path, scroll_name, volpkg_name, "volumes", volume_id)
         os.makedirs(output_folder, exist_ok=True)
+
+        # Download the meta.json for the volume if not yet existent
+        meta_tasks = utils.prepare_file_download_task(volume_url, output_folder, filename=f"meta.json")
+        if meta_tasks:
+            self.start_downloads(meta_tasks, file_type='mask')
+        else:
+            print(f"Meta.json downloaded for '{scroll_name}' and volume '{volume_id}'.")
+
         tasks = utils.prepare_slice_download_tasks(volume_url, ranges, output_folder)
         if not tasks:
             print("All files are already downloaded.")

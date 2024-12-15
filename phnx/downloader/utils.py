@@ -126,6 +126,33 @@ def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_forma
     return tasks
 
 
+def prepare_file_download_task(base_url, output_folder, filename):
+    """
+    Prepares a download task based on the provided base URL.
+
+    Args:
+        base_url (str): The base URL for downloading files.
+        output_folder (str): Path to the folder where the files will be downloaded to.
+        filename (str): Name of the file to download.
+
+    Returns:
+        list: List of download tasks as tuples (url, output_file).
+    """
+    mask_url = urljoin(base_url, filename)
+    output_file = os.path.join(output_folder, filename)
+    tmp_output_file = output_file + '.part'
+
+    # Remove temporary files if they exist
+    if os.path.exists(tmp_output_file):
+        os.remove(tmp_output_file)
+
+    # Skip files that are already downloaded
+    if os.path.exists(output_file):
+        return []
+
+    return [(mask_url, output_file)]
+
+
 def prepare_mask_download_task(base_url, output_folder, filename):
     """
     Prepares a download task based on the provided base URL.
