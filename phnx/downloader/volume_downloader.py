@@ -93,7 +93,7 @@ class VolumeDownloader(BaseDownloader):
         # Download the meta.json for the volume if not yet existent
         meta_tasks = utils.prepare_file_download_task(volume_url, output_folder, filename=f"meta.json")
         if meta_tasks:
-            self.start_downloads(meta_tasks, file_type='mask')
+            self.start_downloads(meta_tasks, file_type='meta.json')
         else:
             print(f"Meta.json downloaded for '{scroll_name}' and volume '{volume_id}'.")
 
