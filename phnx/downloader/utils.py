@@ -119,7 +119,8 @@ def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_forma
                 os.remove(tmp_output_file)
 
             # Skip files that are already downloaded and meet the size requirement
-            if os.path.exists(output_file) and os.path.getsize(output_file) >= 10 * 1024 * 1024:
+            if os.path.exists(output_file):
+                print(f"Skipping {output_file} as it already exists.")
                 continue
 
             tasks.append((url, output_file))
