@@ -31,7 +31,7 @@ class VolumeDownloader(BaseDownloader):
                 choice = int(input("Select volume by number: "))
                 return volume_list[choice - 1]
 
-    def download(self, scroll_name, volpkg_name, volume_id, slices):
+    def download(self, output_path, scroll_name, volpkg_name, volume_id, slices):
         scroll_url = urljoin(self.BASE_URL, f"{scroll_name}/")
 
         # Fetch available volpkgs
@@ -87,7 +87,7 @@ class VolumeDownloader(BaseDownloader):
             return
 
         # Prepare download tasks
-        output_folder = os.path.join("data", scroll_name.lower(), "volumes", volume_id, "layers")
+        output_folder = os.path.join(output_path, scroll_name, "volumes", volume_id, "layers")
         os.makedirs(output_folder, exist_ok=True)
         tasks = utils.prepare_slice_download_tasks(volume_url, ranges, output_folder)
         if not tasks:
