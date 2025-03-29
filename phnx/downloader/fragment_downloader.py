@@ -13,8 +13,6 @@ class FragmentDownloader(BaseDownloader):
 
     def download(self, output_dir, scroll_name, volpkg_name, fragment_id, slices, mask):
         scroll_url = urljoin(self.BASE_URL, f"{scroll_name}/")
-
-        # Fetch available volpkgs
         volpkg_list = utils.fetch_links(scroll_url, self.session, keyword='.volpkg', only_dirs=True)
         if not volpkg_list:
             print(f"No volpkgs found for scroll {scroll_name}.")
@@ -26,8 +24,6 @@ class FragmentDownloader(BaseDownloader):
 
         volpkg_url = urljoin(scroll_url, f"{volpkg_name}/")
         paths_url = urljoin(volpkg_url, "paths/")
-
-        # Fetch available fragments
         fragment_list = utils.fetch_links(paths_url, self.session, only_dirs=True)
         if not fragment_list:
             print(f"No fragments found in volpkg {volpkg_name}.")
@@ -42,9 +38,7 @@ class FragmentDownloader(BaseDownloader):
 
         fragment_url = urljoin(paths_url, f"{fragment_id}/")
         layers_url = urljoin(fragment_url, "layers/")
-
-        # Fetch metadata to get the maximum number of slices
-        slice_files = utils.fetch_links(layers_url, self.session, keyword='.tif')
+        slice_files = utils.fetch_links(layers_url, self.session, keyword=['.tif', '.jpg'])
         if not slice_files:
             print(f"Unable to fetch slices for fragment {fragment_id}.")
             return
@@ -54,7 +48,6 @@ class FragmentDownloader(BaseDownloader):
             print(f"No slices information available for fragment {fragment_id}.")
             return
 
-        # Parse slice ranges
         ranges = utils.parse_slice_ranges(slices, max_slices)
         if not ranges:
             print("No valid slice ranges provided.")
@@ -62,17 +55,39 @@ class FragmentDownloader(BaseDownloader):
 
         fragment_dir = os.path.join(output_dir, scroll_name.lower(), "fragments", fragment_id)
         os.makedirs(fragment_dir, exist_ok=True)
-
         output_folder = os.path.join(fragment_dir, "layers")
-        slice_tasks = utils.prepare_slice_download_tasks(layers_url, ranges, output_folder, filename_format="{:02d}.tif")
+
+        ext = '.tif'
+        if slice_files[0].lower().endswith('.jpg'):
+            ext = '.jpg'
+        filename_format = "{:02d}" + ext
+
+        slice_tasks = utils.prepare_slice_download_tasks(layers_url, ranges, output_folder, filename_format)
         if slice_tasks:
             self.start_downloads(slice_tasks)
         else:
-            print(f"All slices downloaded for '{scroll_name}' and '{fragment_id}'.")
+            print(f"All slices downloaded for {scroll_name} and fragment id '{fragment_id}'.")
 
         if mask:
-            mask_tasks = utils.prepare_mask_download_task(fragment_url, fragment_dir, filename=f"{fragment_id}_mask.png")
-            if mask_tasks:
-                self.start_downloads(mask_tasks, file_type='mask')
+            mask_files = utils.fetch_links(fragment_url, self.session, keyword='mask')
+            if not mask_files:
+                print(f"No mask file found for fragment {fragment_id}. Skipping mask download.")
             else:
-                print(f"Mask downloaded for '{scroll_name}' and '{fragment_id}'.")
+                selected_mask = None
+                for mf in mask_files:
+                    if mf.endswith('_mask.png'):
+                        selected_mask = mf
+                        break
+                if not selected_mask:
+                    for mf in mask_files:
+                        if mf.endswith('_flat_mask.png'):
+                            selected_mask = mf
+                            break
+                if not selected_mask:
+                    selected_mask = mask_files[0]
+                mask_tasks = utils.prepare_file_download_task(fragment_url, fragment_dir, filename=selected_mask)
+                if mask_tasks:
+                    print(f"Downloading mask file: {selected_mask}")
+                    self.start_downloads(mask_tasks, file_type='mask')
+                else:
+                    print(f"Mask file {selected_mask} already exists for '{scroll_name}' and '{fragment_id}'.")
