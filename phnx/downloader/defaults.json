@@ -2,5 +2,18 @@
     "Scroll1": {
         "default_volpkg": "PHercParis4.volpkg",
         "default_volume": "20230205180739"
+    },
+    "Scroll2": {
+        "default_volpkg": "PHercParis3.volpkg"
+    },
+    "Scroll3": {
+        "default_volpkg": "PHerc332.volpkg"
+    },
+    "Scroll4": {
+        "default_volpkg": "PHerc1667.volpkg"
+    },
+    "Scroll5": {
+        "default_volpkg": "PHerc172.volpkg",
+        "default_volume": "20241024131838"
     }
 }
