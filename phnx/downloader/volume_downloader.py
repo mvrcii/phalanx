@@ -95,7 +95,7 @@ class VolumeDownloader(BaseDownloader):
         if meta_tasks:
             self.start_downloads(meta_tasks, file_type='meta.json')
         else:
-            print(f"Meta.json downloaded for '{scroll_name}' and volume '{volume_id}'.")
+            print(f"Meta.json downloaded for {scroll_name} and volume '{volume_id}'.")
 
         tasks = utils.prepare_slice_download_tasks(volume_url, ranges, output_folder)
         if not tasks:
