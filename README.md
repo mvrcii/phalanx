@@ -2,86 +2,152 @@
 
 # phalanx
 
-phalanx is a specialized tool for downloading scrolls and fragments, allowing users to efficiently retrieve specific slices from volumes and fragments. The name "phalanx" draws inspiration from the mythical phoenix, symbolizing rebirth and revival. Just as the phoenix rises from its ashes, phalanx is designed to help resurrect and breathe new life into ancient scrolls buried under the ashes of Mount Vesuvius, offering a modern way to explore and preserve these fragments of history.
+[![PyPI version](https://img.shields.io/pypi/v/vesuvius-phalanx.svg)](https://pypi.org/project/vesuvius-phalanx/)
+[![Python versions](https://img.shields.io/pypi/pyversions/vesuvius-phalanx.svg)](https://pypi.org/project/vesuvius-phalanx/)
+[![License](https://img.shields.io/github/license/mvrcii/phalanx.svg)](https://github.com/mvrcii/phalanx/blob/main/LICENSE)
+
+A specialized tool for downloading scrolls and fragments from the Vesuvius Challenge dataset. Phalanx allows users to efficiently retrieve specific slices from volumes and fragments with parallel downloading capability.
+
+The name "phalanx" draws inspiration from the mythical phoenix, symbolizing rebirth and revival. Just as the phoenix rises from its ashes, phalanx helps resurrect and breathe new life into ancient scrolls buried under the ashes of Mount Vesuvius.
+
+## Key Features
+
+- **Selective Downloads**: Download specific slice ranges instead of entire volumes
+- **Multithreaded Downloading**: Parallel download operations for improved performance
+- **Progress Tracking**: Visual progress bars showing completion status and data transfer
+- **Smart Defaults**: Automatically selects appropriate volume/fragment IDs when possible
+- **Error Handling**: Robust retry mechanism and helpful error messages
+- **Clean CLI**: Intuitive command-line interface with comprehensive help documentation
 
 ## Installation
-
 ```sh
 pip install vesuvius-phalanx
 ```
 
-## Requirements
-- Python 3.8+
+### Dependencies
 
-### Core Dependencies
+| Package | Purpose |
+|---------|---------|
+| requests | HTTP requests and content downloading |
+| beautifulsoup4 | HTML parsing and web page data extraction |
+| tqdm | Progress bar visualization |
+| click | User-friendly command-line interface |
 
-- **requests**: For handling HTTP requests and downloading content from the web.
-- **beautifulsoup4**: For parsing HTML and extracting useful information from web pages.
-- **tqdm**: Provides a progress bar to visualize the download progress.
-- **click**: A package for creating user-friendly command-line interfaces.
 
-## Usage
+## Command-line Usage
 
-### Download Slices from a Volume
-
-```sh
-phalanx download-volume --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] [--volume-id VOLUME_ID] [--slices SLICES]
-```
-
-- `--scroll-name`: Name of the scroll (e.g., 'Scroll1').
-- `--volpkg-name`: Name of the volpkg (optional).
-- `--volume-id`: Volume identifier (optional).
-- `--slices`: Slice ranges to download (default is all).
-
-### Download Slices from a Fragment
+### Download Volume Slices
 
 ```sh
-phalanx download-fragment --scroll-name SCROLL_NAME [--volpkg-name VOLPKG_NAME] --fragment-id FRAGMENT_ID [--slices SLICES] [--mask]
+phalanx download-volume SCROLL_ID --output-path OUTPUT_PATH [OPTIONS]
 ```
 
-- `--scroll-name`: Name of the scroll (e.g., 'Scroll1').
+#### Parameters:
+
+- `SCROLL_ID`: Numeric ID (e.g., 5) - will be prepended with "Scroll" automatically
+- `--output-path`: Path to store downloaded data (full_scrolls directory)
+- `--volpkg-name`: (Optional) Specific volpkg name if multiple are available
+- `--volume-id`: (Optional) Specific volume identifier
+- `--slices`: (Optional) Slice ranges to download (default: all)
+  - Format: "start-end" or "start-end,another-range"
+  - Example: "1-5,10,15-20"
+
+
+### Download Fragment Slices
+
+```sh
+phalanx download-fragment SCROLL_ID FRAG_ID [OPTIONS]
+```
+- `SCROLL_ID`: Numeric scroll ID (e.g., 5). This value will be prepended with "Scroll" (e.g., Scroll5).
+- `FRAG_ID`: Fragment identifier (e.g., 20241024131838).
+- `--output-dir`: Output data root directory (default: data).
 - `--volpkg-name`: Name of the volpkg (optional).
-- `--fragment-id`: Fragment identifier.
 - `--slices`: Slice ranges to download (default is all).
 - `--mask`: Download mask (default is true).
 
+#### Parameters:
+
+- `SCROLL_ID`: Numeric ID (e.g., 5) - will be prepended with "Scroll" automatically
+- `FRAG_ID`: Fragment identifier (e.g., 20241024131838)
+- `--output-dir`: (Optional) Output data root directory (default: data)
+- `--volpkg-name`: (Optional) Specific volpkg name if multiple are available
+- `--slices`: (Optional) Slice ranges to download (default: all)
+- `--mask`: (Optional) Whether to download the mask (default: true)
+
 ## Examples
 
-### Download Slices 1-5 from a Scroll Volume
+### Basic Usage
+
+Download all volume slices for Scroll 1 with auto-detected defaults:
 
 ```sh
-phnx download-volume --scroll-name Scroll1 --volume-id 20230205180739 --slices 1-5
+phalanx download-volume 1 --output-path ./data
 ```
 
-### Download All Slices from a Scroll Volume
+Download specific slices from Scroll 1:
 
 ```sh
-phnx download-volume --scroll-name Scroll1 --volume-id 20230205180739
+phalanx download-volume 1 --output-path ./data --slices 1-5
 ```
 
-### Download All Slices from a Scroll Fragment 
+### Advanced Usage
+
+Download with explicit volume identifier:
 
 ```sh
-phnx download-fragment --scroll-name Scroll1 --fragment-id 20230503225234 --slices all
+phalanx download-volume 1 --output-path ./data --volume-id 20230205180739 --slices 1-5
 ```
 
-## Features
+Download a fragment with its mask:
 
-- **Multithreaded Downloads**: Download slices in parallel for improved performance.
-- **Flexible Slice Selection**: Download specific slices, ranges, or all slices.
-- **User-Friendly CLI**: Command-line interface built with [Click](https://click.palletsprojects.com/en/stable/).
+```sh
+phalanx download-fragment 1 20230503225234 --output-dir ./vesuvius_data --slices all
+```
+
+Download a fragment without its mask:
+
+```sh
+phalanx download-fragment 1 20230503225234 --mask false
+```
+
+
+## How It Works
+
+Phalanx operates by:
+
+1. **Discovery**: Identifying available volpkgs and volumes for the requested scroll
+2. **Selection**: Choosing appropriate defaults or using user-specified identifiers
+3. **Metadata Retrieval**: Fetching slice information and other metadata
+4. **Parallel Downloads**: Creating multiple worker threads for faster downloading
+5. **Error Handling**: Implementing retries and cleanup for failed or interrupted downloads
+
+## Technical Details
+
+- **Intelligent Defaults**: The tool maintains a defaults.json file with preferred volpkg and volume IDs for common scrolls
+- **Session Management**: Creates optimized HTTP sessions with retry capabilities
+- **Resource Management**: Cleans up partial downloads on startup and handles interruptions
+- **Progress Reporting**: Shows real-time download progress with data transfer rates
+
+
+## Command Aliases
+
+For convenience, you can also use the shorter `phnx` command instead of `phalanx`:
+
+```sh
+phnx download-volume 1 --output-path ./data
+```
 
 ## Contributing
 
-Contributions are welcome! Please submit a pull request or open an issue.
+Contributions are welcome! Please submit a pull request or open an issue on GitHub.
+
+Before contributing:
+- Fork the repository
+- Create a feature branch
+- Add your changes
+- Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Additional Notes
-
-- **Progress Bar**: Tracks the number of files downloaded and total data.
-- **Error Handling**: Informs users if any files fail to download after retries.
-- **Extensibility**: Easily add new downloaders or features.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
