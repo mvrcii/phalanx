@@ -21,7 +21,21 @@ def create_session():
 
 
 def fetch_links(url, session, keyword=None, only_dirs=False):
-    """Fetches and returns a sorted list of links from a given URL that contain the specified keyword."""
+    """
+    Fetches and returns a sorted list of links from a given URL that contain the specified keyword(s).
+
+    Parameters:
+        url (str): The URL to fetch links from.
+        session (requests.Session): The session to use for the HTTP request.
+        keyword (str or list of str, optional): A keyword or list of keywords that must appear in the link.
+        only_dirs (bool): If True, return only directory links (those ending with '/').
+
+    Returns:
+        list: A sorted list of filtered link names.
+    """
+    # Normalize keyword input: convert single string to a list, or leave as-is if already a list.
+    keywords = [keyword] if isinstance(keyword, str) else keyword if keyword else None
+
     try:
         response = session.get(url, timeout=10)
         response.raise_for_status()
@@ -31,8 +45,10 @@ def fetch_links(url, session, keyword=None, only_dirs=False):
             href = link.get('href', '')
             if href in ('../',):
                 continue  # Skip parent directory link
-            if keyword and keyword not in href.lower():
-                continue
+            if keywords:
+                # Only include the link if at least one keyword is found in the href (case insensitive)
+                if not any(kw.lower() in href.lower() for kw in keywords):
+                    continue
             is_dir = href.endswith('/')
             if only_dirs and not is_dir:
                 continue
@@ -120,7 +136,7 @@ def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_forma
 
             # Skip files that are already downloaded and meet the size requirement
             if os.path.exists(output_file):
-                print(f"Skipping {output_file} as it already exists.")
+                print(f"Skipping the download of {output_file} as it already exists.")
                 continue
 
             tasks.append((url, output_file))
@@ -135,33 +151,6 @@ def prepare_file_download_task(base_url, output_folder, filename):
         base_url (str): The base URL for downloading files.
         output_folder (str): Path to the folder where the files will be downloaded to.
         filename (str): Name of the file to download.
-
-    Returns:
-        list: List of download tasks as tuples (url, output_file).
-    """
-    mask_url = urljoin(base_url, filename)
-    output_file = os.path.join(output_folder, filename)
-    tmp_output_file = output_file + '.part'
-
-    # Remove temporary files if they exist
-    if os.path.exists(tmp_output_file):
-        os.remove(tmp_output_file)
-
-    # Skip files that are already downloaded
-    if os.path.exists(output_file):
-        return []
-
-    return [(mask_url, output_file)]
-
-
-def prepare_mask_download_task(base_url, output_folder, filename):
-    """
-    Prepares a download task based on the provided base URL.
-
-    Args:
-        base_url (str): The base URL for downloading files.
-        output_folder (str): Path to the folder where the files will be downloaded.
-        filename (str): Name of the mask file to download.
 
     Returns:
         list: List of download tasks as tuples (url, output_file).
