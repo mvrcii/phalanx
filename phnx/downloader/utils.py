@@ -6,7 +6,10 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
+from rich.console import Console
 from urllib3.util.retry import Retry
+
+console = Console()
 
 
 def create_session():
@@ -57,7 +60,7 @@ def fetch_links(url, session, keyword=None, only_dirs=False):
             links.append(href.strip('/'))
         return sorted(links)
     except requests.RequestException as e:
-        print(f"Error fetching links from {url}: {e}")
+        console.print(f"[bold red]Error fetching links from {url}: {e}[/bold red]")
         return []
 
 
@@ -69,21 +72,21 @@ def fetch_meta(folder_url, session):
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
-        print(f"Failed to fetch meta.json from {folder_url}: {e}")
+        console.print(f"[bold red]Failed to fetch meta.json from {folder_url}: {e}[/bold red]")
         return None
 
 
 def parse_slice_ranges(slice_ranges, max_slices):
     """
-       Parses slice ranges from a user input format like "1-10,15,20-25".
+    Parses slice ranges from a user input format like "1-10,15,20-25".
 
-       Args:
-           slice_ranges (str): Input string defining slice ranges (e.g., "1-10,15,20-25").
-           max_slices (int): Maximum number of slices to consider.
+    Args:
+        slice_ranges (str): Input string defining slice ranges (e.g., "1-10,15,20-25").
+        max_slices (int): Maximum number of slices to consider.
 
-       Returns:
-           list of tuples: List of ranges as (start, end, step).
-       """
+    Returns:
+        list of tuples: List of ranges as (start, end, step).
+    """
     if slice_ranges.strip().lower() == 'all':
         return [(0, max_slices - 1, 1)]
 
@@ -93,7 +96,7 @@ def parse_slice_ranges(slice_ranges, max_slices):
         part = part.strip()
         match = pattern.match(part)
         if not match:
-            print(f"Invalid range format: '{part}'")
+            console.print(f"[bold red]Invalid range format: '{part}'[/bold red]")
             continue
         start = int(match.group(1))
         end = int(match.group(2)) if match.group(2) else start
@@ -101,7 +104,7 @@ def parse_slice_ranges(slice_ranges, max_slices):
         if start > end:
             start, end = end, start
         if start < 0 or end >= max_slices:
-            print(f"Range {start}-{end} is out of bounds (0-{max_slices - 1}).")
+            console.print(f"[bold red]Range {start}-{end} is out of bounds (0-{max_slices - 1}).[/bold red]")
             continue
         ranges.append((start, end, step))
     return ranges
@@ -118,9 +121,10 @@ def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_forma
         filename_format (str): Format string for file naming. Default is "{:05d}.tif".
 
     Returns:
-        list: List of download tasks as tuples (url, output_file).
+        tuple: (tasks, skipped_count) - List of download tasks and count of skipped files
     """
     tasks = []
+    skipped_count = 0
     os.makedirs(output_folder, exist_ok=True)
 
     for start, end, step in ranges:
@@ -136,11 +140,12 @@ def prepare_slice_download_tasks(base_url, ranges, output_folder, filename_forma
 
             # Skip files that are already downloaded and meet the size requirement
             if os.path.exists(output_file):
-                print(f"Skipping the download of {output_file} as it already exists.")
+                skipped_count += 1
                 continue
 
             tasks.append((url, output_file))
-    return tasks
+
+    return tasks, skipped_count
 
 
 def prepare_file_download_task(base_url, output_folder, filename):
@@ -183,7 +188,10 @@ def format_bytes(size):
 
 def download_file(url, output_file, progress_queue, retries=3):
     """Downloads a file with retries, reports progress via progress_queue."""
+    console = Console()
     temp_file = output_file + '.part'
+    total_bytes = 0
+
     for attempt in range(retries):
         try:
             session = create_session()  # Create a session per thread
@@ -195,17 +203,21 @@ def download_file(url, output_file, progress_queue, retries=3):
                     for chunk in response.iter_content(chunk_size=1024 * 1024):  # 1 MB chunks
                         if chunk:
                             f.write(chunk)
+                            chunk_size = len(chunk)
+                            total_bytes += chunk_size
                             # Report bytes downloaded
-                            progress_queue.put(('bytes', len(chunk)))
+                            progress_queue.put(('bytes', chunk_size))
                 os.rename(temp_file, output_file)
                 # Report file completion
                 progress_queue.put(('file', 1))
-                return
+                return total_bytes
         except requests.RequestException as e:
-            print(f"Error downloading {url}: {e}")
+            console.print(f"[yellow]Error downloading {url}: {e}. Retrying ({attempt + 1}/{retries})...[/yellow]")
             time.sleep(2 ** attempt)
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            console.print(f"[bold red]Unexpected error: {e}[/bold red]")
             time.sleep(2 ** attempt)
-    print(f"Failed to download {url} after {retries} attempts.")
-    progress_queue.put(('file', 1))  # To ensure progress bar completes even if download fails
+
+    console.print(f"[bold red]Failed to download {url} after {retries} attempts.[/bold red]")
+    progress_queue.put(('file', 1))  # Ensure progress bar completes even on failure
+    return 0

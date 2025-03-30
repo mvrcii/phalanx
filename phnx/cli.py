@@ -16,14 +16,16 @@ def cli():
 @click.option('--output-path', required=True, help='The output path (the path of the full_scrolls directory).')
 @click.option('--volume-id', default=None, help='Volume identifier.')
 @click.option('--slices', default='all', help='Slice ranges to download (e.g., "1-5,10,15-20").')
-def download_volume(scroll_id, volpkg_name, output_path, volume_id, slices):
+@click.option('--verbosity', type=click.Choice(['quiet', 'normal', 'verbose']),
+              default='normal', help='Control output verbosity level')
+def download_volume(scroll_id, volpkg_name, output_path, volume_id, slices, verbosity):
     """
     Download slices from a volume.
 
     Mandatory arguments:
       scroll-id: Numeric scroll ID (e.g., 5). This value will be prepended with "Scroll" (e.g., Scroll5).
     """
-    downloader = VolumeDownloader()
+    downloader = VolumeDownloader(verbosity=verbosity)
     downloader.download(
         output_path=output_path,
         scroll_name=f"Scroll{scroll_id}",
@@ -42,7 +44,9 @@ def download_volume(scroll_id, volpkg_name, output_path, volume_id, slices):
 @click.option('--mask/--no-mask', default=True, help='Attempt to download the mask for the fragment (default: true).')
 @click.option('--parallel/--sequential', default=True,
               help='Download fragments in parallel or sequentially (default: parallel).')
-def download_fragment(scroll_id, frag_ids, volpkg_name, output_dir, slices, mask, parallel):
+@click.option('--verbosity', type=click.Choice(['quiet', 'normal', 'verbose']),
+              default='normal', help='Control output verbosity level')
+def download_fragment(scroll_id, frag_ids, volpkg_name, output_dir, slices, mask, parallel, verbosity):
     """
     Download slices from one or multiple fragments.
 
@@ -50,7 +54,7 @@ def download_fragment(scroll_id, frag_ids, volpkg_name, output_dir, slices, mask
       scroll-id: Numeric scroll ID (e.g., 5). This value will be prepended with "Scroll" (e.g., Scroll5).
       frag-ids: Fragment ID or comma-separated list of fragment IDs (e.g., "20241024131838" or "20241024131838,20241024131839").
     """
-    downloader = FragmentDownloader()
+    downloader = FragmentDownloader(verbosity=verbosity)
 
     # Parse fragment IDs
     fragment_ids = [fid.strip() for fid in frag_ids.split(',')]
