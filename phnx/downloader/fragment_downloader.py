@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 from urllib.parse import urljoin
 
@@ -10,6 +11,51 @@ class FragmentDownloader(BaseDownloader):
         super().__init__()
         self.session = utils.create_session()
         self.default_config = BaseDownloader.load_default_config()
+
+    def download_multiple(self, output_dir, scroll_name, volpkg_name, fragment_ids, slices, mask, parallel=True):
+        """
+        Download multiple fragments.
+
+        Args:
+            output_dir: Output directory for downloaded files
+            scroll_name: Scroll name
+            volpkg_name: Volume package name or None
+            fragment_ids: List of fragment IDs to download
+            slices: Slice ranges to download
+            mask: Whether to download the mask
+            parallel: Whether to download fragments in parallel or sequentially
+        """
+        if parallel:
+            # Download fragments in parallel using ThreadPoolExecutor
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                # Create a dictionary to map futures to fragment IDs
+                future_to_frag = {
+                    executor.submit(
+                        self.download,
+                        output_dir,
+                        scroll_name,
+                        volpkg_name,
+                        fragment_id,
+                        slices,
+                        mask
+                    ): fragment_id for fragment_id in fragment_ids
+                }
+
+                # Process completed futures
+                for future in concurrent.futures.as_completed(future_to_frag):
+                    fragment_id = future_to_frag[future]
+                    try:
+                        future.result()
+                    except Exception as e:
+                        print(f"Error downloading fragment {fragment_id}: {str(e)}")
+        else:
+            # Download fragments sequentially
+            for fragment_id in fragment_ids:
+                try:
+                    self.download(output_dir, scroll_name, volpkg_name, fragment_id, slices, mask)
+                except Exception as e:
+                    print(f"Error downloading fragment {fragment_id}: {str(e)}")
+                    continue
 
     def download(self, output_dir, scroll_name, volpkg_name, fragment_id, slices, mask):
         scroll_url = urljoin(self.BASE_URL, f"{scroll_name}/")
