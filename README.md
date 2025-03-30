@@ -13,8 +13,12 @@ The name "phalanx" draws inspiration from the mythical phoenix, symbolizing rebi
 ## Key Features
 
 - **Selective Downloads**: Download specific slice ranges instead of entire volumes
+- **Multi-Fragment Support**: Download multiple fragments with a single command
+- **Parallel/Sequential Mode**: Choose between parallel or sequential download modes
+- **Rich Terminal Interface**: Color-coded progress bars and status messages
 - **Multithreaded Downloading**: Parallel download operations for improved performance
 - **Progress Tracking**: Visual progress bars showing completion status and data transfer
+- **Operation Summaries**: Detailed download summaries showing success rates and statistics
 - **Smart Defaults**: Automatically selects appropriate volume/fragment IDs when possible
 - **Error Handling**: Robust retry mechanism and helpful error messages
 - **Clean CLI**: Intuitive command-line interface with comprehensive help documentation
@@ -30,7 +34,7 @@ pip install vesuvius-phalanx
 |---------|---------|
 | requests | HTTP requests and content downloading |
 | beautifulsoup4 | HTML parsing and web page data extraction |
-| tqdm | Progress bar visualization |
+| rich | Terminal formatting and progress visualization |
 | click | User-friendly command-line interface |
 
 
@@ -51,28 +55,27 @@ phalanx download-volume SCROLL_ID --output-path OUTPUT_PATH [OPTIONS]
 - `--slices`: (Optional) Slice ranges to download (default: all)
   - Format: "start-end" or "start-end,another-range"
   - Example: "1-5,10,15-20"
+- `--verbosity`: (Optional) Control output detail level (quiet, normal, verbose)
 
 
 ### Download Fragment Slices
 
 ```sh
-phalanx download-fragment SCROLL_ID FRAG_ID [OPTIONS]
+phalanx download-fragment SCROLL_ID FRAG_IDS [OPTIONS]
 ```
-- `SCROLL_ID`: Numeric scroll ID (e.g., 5). This value will be prepended with "Scroll" (e.g., Scroll5).
-- `FRAG_ID`: Fragment identifier (e.g., 20241024131838).
-- `--output-dir`: Output data root directory (default: data).
-- `--volpkg-name`: Name of the volpkg (optional).
-- `--slices`: Slice ranges to download (default is all).
-- `--mask`: Download mask (default is true).
 
 #### Parameters:
 
 - `SCROLL_ID`: Numeric ID (e.g., 5) - will be prepended with "Scroll" automatically
-- `FRAG_ID`: Fragment identifier (e.g., 20241024131838)
+- `FRAG_IDS`: Fragment identifier(s) - can be a single ID or comma-separated list 
+  - Example single: 20241024131838
+  - Example multiple: 20241024131838,20241024131839,20241024131840
 - `--output-dir`: (Optional) Output data root directory (default: data)
 - `--volpkg-name`: (Optional) Specific volpkg name if multiple are available
 - `--slices`: (Optional) Slice ranges to download (default: all)
-- `--mask`: (Optional) Whether to download the mask (default: true)
+- `--mask/--no-mask`: (Optional) Whether to download the mask (default: true)
+- `--parallel/--sequential`: (Optional) Download mode for multiple fragments (default: parallel)
+- `--verbosity`: (Optional) Control output detail level (quiet, normal, verbose)
 
 ## Examples
 
@@ -98,16 +101,28 @@ Download with explicit volume identifier:
 phalanx download-volume 1 --output-path ./data --volume-id 20230205180739 --slices 1-5
 ```
 
-Download a fragment with its mask:
+Download a single fragment with its mask:
 
 ```sh
 phalanx download-fragment 1 20230503225234 --output-dir ./vesuvius_data --slices all
 ```
 
-Download a fragment without its mask:
+Download multiple fragments in parallel:
 
 ```sh
-phalanx download-fragment 1 20230503225234 --mask false
+phalanx download-fragment 5 20241108120732,20241108111522,20241113090990 --slices 17-20 --parallel
+```
+
+Download multiple fragments sequentially:
+
+```sh
+phalanx download-fragment 5 20241108120732,20241108111522 --slices 17-20 --sequential --no-mask
+```
+
+Download with minimal console output:
+
+```sh
+phalanx download-fragment 5 20241108120732 --verbosity quiet
 ```
 
 
@@ -120,6 +135,7 @@ Phalanx operates by:
 3. **Metadata Retrieval**: Fetching slice information and other metadata
 4. **Parallel Downloads**: Creating multiple worker threads for faster downloading
 5. **Error Handling**: Implementing retries and cleanup for failed or interrupted downloads
+6. **Operation Summary**: Providing detailed statistics about the download operation
 
 ## Technical Details
 
@@ -127,6 +143,8 @@ Phalanx operates by:
 - **Session Management**: Creates optimized HTTP sessions with retry capabilities
 - **Resource Management**: Cleans up partial downloads on startup and handles interruptions
 - **Progress Reporting**: Shows real-time download progress with data transfer rates
+- **Rich Terminal Interface**: Uses the Rich library for enhanced console output
+- **Parallel Processing**: Manages concurrent downloads while maintaining readable output
 
 
 ## Command Aliases
@@ -150,4 +168,3 @@ Before contributing:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
